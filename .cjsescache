@@ -1,5 +1,6 @@
 {
   "bundle.js": null,
+  "inject/dirname.js": null,
   "inject/global.js": null,
   "node_modules/debug/src/index.js": null,
   "node_modules/glob/glob.js": null,

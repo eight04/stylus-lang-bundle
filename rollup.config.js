@@ -37,14 +37,19 @@ export default {
         match: /renderer.js$/,
         test: /module\.exports = /g,
         replace: "module.exports.Renderer = "
+      }, {
+        match: /arguments\.js$/,
+        test: /require\('\.\.\/nodes'\)/g,
+        replace: "{Expression: require('./expression')}"
       }]
     }),
     cjs({nested: true}),
     builtins(),
     inject({
-      global: path.resolve("inject/global.js")
+      global: path.resolve("inject/global.js"),
+      __dirname: path.resolve("inject/dirname.js")
     }),
-    terser(),
+    !proces.env.pretty && terser(),
     process.env.analyze && analyzer()
   ].filter(Boolean),
   experimentalCodeSplitting: true
