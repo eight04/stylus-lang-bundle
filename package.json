@@ -4,24 +4,31 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "test": "node test.js",
     "build": "shx rm -rf dist && rollup -c"
   },
   "author": "eight04 <eight04@gmail.com>",
   "license": "Unlicense",
   "devDependencies": {
-    "rollup": "^0.62.0",
-    "rollup-plugin-analyzer": "^2.0.3",
-    "rollup-plugin-cjs-es": "^0.5.1",
-    "rollup-plugin-inject": "^2.0.0",
+    "event-lite": "^0.1.1",
+    "path-browserify": "^1.0.0",
+    "rollup": "^0.65.2",
+    "rollup-plugin-alias": "^1.4.0",
+    "rollup-plugin-analyzer": "^2.1.0",
+    "rollup-plugin-cjs-es": "^0.6.0",
+    "rollup-plugin-external-globals": "^0.2.0",
+    "rollup-plugin-inject": "^2.2.0",
+    "rollup-plugin-inline-js": "^0.3.0",
     "rollup-plugin-json": "^3.0.0",
-    "rollup-plugin-node-builtins": "^2.1.2",
-    "rollup-plugin-node-globals": "^1.2.1",
-    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-node-globals": "^1.4.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-re": "^1.0.7",
-    "rollup-plugin-terser": "^1.0.1",
-    "shx": "^0.3.0",
+    "rollup-plugin-terser": "^2.0.2",
+    "shx": "^0.3.2",
     "stylus": "github:stylus/stylus#pull/2394/head"
   },
-  "dependencies": {},
+  "dependencies": {
+    "tiny-sha1": "^0.2.1"
+  },
   "private": true
 }

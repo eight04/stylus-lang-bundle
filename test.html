@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="dist/stylus-renderer.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      height: 100vh;
+      margin: 0;
+    }
+    textarea {
+      background: whitesmoke;
+      width: 50%;
+    }
+    output {
+      width: 50%;
+      font-family: monospace;
+      white-space: pre;
+    }
+    output.error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <textarea></textarea>
+  <output></output>
+  <script>
+    let timeout;
+    const textarea = document.querySelector("textarea");
+    textarea.addEventListener("input", e => {
+      clearTimeout(timeout);
+      timeout = setTimeout(update, 1000);
+    });
+    textarea.addEventListener("change", e => {
+      clearTimeout(timeout);
+      update();
+    });
+    function update() {
+      const output = document.querySelector("output");
+      try {
+        output.textContent = new StylusRenderer(textarea.value).render();
+        output.classList.remove("error");
+      } catch (err) {
+        output.textContent = String(err);
+        output.classList.add("error");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,10 @@
 import path from "path";
-import builtins from "rollup-plugin-node-builtins";
+
+import alias from "rollup-plugin-alias";
 import cjs from "rollup-plugin-cjs-es";
+import externalGlobals from "rollup-plugin-external-globals";
 import inject from "rollup-plugin-inject";
+import inline from "rollup-plugin-inline-js";
 import json from "rollup-plugin-json";
 import re from "rollup-plugin-re";
 import resolve from "rollup-plugin-node-resolve";
@@ -9,55 +12,82 @@ import {terser} from "rollup-plugin-terser";
 import {plugin as analyzer} from "rollup-plugin-analyzer";
 
 export default {
-	input: {
-    "stylus.min": "bundle.js"
-  },
+	input: "bundle.js",
   output: {
+    file: "dist/stylus-renderer.min.js",
     format: "iife",
-    name: "StylusRenderer",
-    dir: "dist"
+    name: "StylusRenderer"
   },
   plugins: [
+    alias({
+      events: require.resolve("./shim/events"),
+      url: require.resolve("./shim/url"),
+      crypto: require.resolve("./shim/crypto"),
+      glob: require.resolve("./shim/glob"),
+      fs: require.resolve("./shim/fs"),
+      path: require.resolve("path-browserify")
+    }),
     shimEmpty([
       "node_modules/stylus/lib/visitor/sourcemapper.js",
-      "node_modules/glob/glob.js",
       "node_modules/stylus/lib/functions/image-size.js",
-      "node_modules/debug/src/index.js"
     ]),
+    inline(),
     resolve({
+      browser: true,
       extensions: [".js", ".json"]
     }),
     json(),
     re({
-      patterns: [{
-        match: /selector.js$/,
-        test: /\bnew require\b/g,
-        replace: "require"
-      }, {
-        match: /renderer.js$/,
-        test: /module\.exports = /g,
-        replace: "module.exports.Renderer = "
-      }, {
-        match: /arguments\.js$/,
-        test: /require\('\.\.\/nodes'\)/g,
-        replace: "{Expression: require('./expression')}"
-      }]
+      patterns: [
+        {
+          match: /selector.js$/,
+          test: /\bnew require\b/g,
+          replace: "require"
+        },
+        {
+          match: /renderer.js$/,
+          test: /module\.exports = /g,
+          replace: "module.exports.Renderer = "
+        },
+        {
+          match: /arguments\.js$/,
+          test: /require\('\.\.\/nodes'\)/g,
+          replace: "{Expression: require('./expression')}"
+        },
+        {
+          match: /utils\.js$/,
+          test: /this\.indent/g,
+          replace: "this && this.indent"
+        }
+      ]
     }),
-    cjs({nested: true}),
-    builtins(),
+    cjs({
+      nested: true
+    }),
+    re({
+      patterns: [
+        {
+          test: /export default \(function/g,
+          replace: "export default (null, function"
+        }
+      ]
+    }),
+    externalGlobals({
+      util: "nodeUtil"
+    }),
     inject({
-      global: path.resolve("inject/global.js"),
-      __dirname: path.resolve("inject/dirname.js")
+      __dirname: require.resolve("./inject/dirname")
     }),
-    !proces.env.pretty && terser(),
-    process.env.analyze && analyzer()
-  ].filter(Boolean),
-  experimentalCodeSplitting: true
+    terser({
+      keep_fnames: true
+    })
+  ]
 };
 
 function shimEmpty(files) {
   files = files.map(f => path.resolve(f));
   return {
+    name: "rollup-plugin-shim-empty",
     transform(code, id) {
       if (id[0] === "\x00") {
         return;
